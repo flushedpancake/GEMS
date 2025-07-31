@@ -15,9 +15,14 @@
     along with GEMS Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstring>
 #include <cstdio>
 #include <cmath>
-#include <direct.h>
+#ifdef _WIN32
+    #include <direct.h>
+    #elif defined __linux__
+        #include <sys/stat.h>
+#endif
 #include "instruments.h"
 #include "vgm_parser.h"
 #include "midi.h"
@@ -600,7 +605,15 @@ int main(int argc, char **args)
 		printf("Error: invalid command\n");
 	}
 
-	mkdir(args[2]);
+	#if defined(WIN32)
+	{
+		_mkdir(args[2]);
+	}
+	#elif defined(UNIX)
+	{
+		mkdir(args[2], 0777);
+	}
+	#endif
 	sprintf((char*)buff,"%s\\vgm.mid",args[2]);
 
 	FILE *file = fopen((char*)buff,"wb");

@@ -17,9 +17,14 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <cerrno>
-#include <direct.h>
+#ifdef _WIN32
+    #include <direct.h>
+    #elif defined __linux__
+        #include <sys/stat.h>
+#endif
 #include "common.h"
 #include "instruments.h"
 
@@ -253,11 +258,19 @@ int main(int argc, char **args)
 	for (int i=0; i<count; ++i)
 	{
 		sprintf(buff,"%s%03d",dir,i);
+		#if defined(WIN32)
 		if (_mkdir(buff) != 0 && errno != EEXIST)
 		{
 			printf("Can't create dir \"%03d\"\n",i);
 			return 0;
 		}
+		#elif defined(UNIX)
+		if (mkdir(buff, 0777) != 0 && errno != EEXIST)
+		{
+			printf("Can't create dir \"%03d\"n",i);
+			return 0;
+		}
+		#endif
 		sprintf(buff,"%s%03d\\%03d.code",dir,i,i);
 		FILE *f_seq = fopen(buff,"wb");
 		if (!f_seq)
